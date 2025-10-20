@@ -2,15 +2,25 @@ using UnityEngine;
 
 public class PlayerControls : MonoBehaviour
 {
+    [Header("Physics Variables")]
     public Rigidbody2D rb;
+    public float MoveSpeed;
+    public float JumpForce, AirSpeed, AirMax;
+
+    [Header("Animations")]
     public Animator animator;
-    public float MoveSpeed, JumpForce, AirSpeed, AirMax;
-    public bool Grounded = false;   
+    public float MaxBlink;
+    public bool Grounded = false;
+
+    [Header("Sound Effects")]
+    public AudioSource playerSource;
+    public AudioClip coinClip;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        playerSource = GetComponent<AudioSource>(); 
         Grounded = false;
     }
 
@@ -22,6 +32,9 @@ public class PlayerControls : MonoBehaviour
         animator.SetFloat("xSpeed", xSpeed);
         float ySpeed = rb.linearVelocityY;
         animator.SetFloat("ySpeed", ySpeed);
+        float blink = Random.Range(0f,MaxBlink);
+        if (blink < 1f)
+            animator.SetTrigger("Blink");
 
         //Get ButtonDown Has to be in update
         if (Input.GetButtonDown("Jump") && Grounded)
@@ -63,6 +76,15 @@ public class PlayerControls : MonoBehaviour
         if (collision.gameObject.layer == 3)
         {
             Grounded = false;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Coin"))
+        {
+            playerSource.PlayOneShot(coinClip);
+            Destroy(collision.gameObject);
         }
     }
 }
